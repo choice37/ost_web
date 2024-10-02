@@ -59,6 +59,7 @@
                 if (response.ok) {
                     const jsonResponse = await response.json();
                     console.log('파일 업로드 성공:', jsonResponse);
+                    fetchFileList();
                 } else {
                     const errorResponse = await response.json();
                     console.error('파일 업로드 실패:', errorResponse);
@@ -132,7 +133,8 @@
                 const filePath = checkbox.value;
                 await deleteFile(filePath);
             }
-            setTimeout(fetchFileList, 2000); // 1초 후 파일 목록 갱신
+            fetchFileList(); 
+            // setTimeout(fetchFileList, 2000); // 1초 후 파일 목록 갱신
         }
 
         // 파일 삭제 함수
