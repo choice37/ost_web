@@ -22,16 +22,27 @@
         let repoOwner, repoName, accessToken;
 
         // JSON 파일에서 설정 불러오기
+        // async function loadConfig() {
+        //     const response = await fetch('git_config.json');
+        //     if (response.ok) {
+        //         const config = await response.json();
+        //         repoOwner = config.repoOwner;
+        //         repoName = config.repoName;
+        //         accessToken = config.accessToken;
+        //         fetchFileList(); // 설정을 불러온 후 파일 목록을 가져옴
+        //     } else {
+        //         console.error('config.json을 가져오는 데 실패했습니다:', await response.json());
+        //     }
+        // }
+        // yaml 파일에서 설정 불러오기
         async function loadConfig() {
-            const response = await fetch('git_config.json');
+            const response = await fetch('git_config.yaml');
             if (response.ok) {
-                const config = await response.json();
-                repoOwner = config.repoOwner;
-                repoName = config.repoName;
-                accessToken = config.accessToken;
+                const config = await response.text();
+                const { repoOwner, repoName, accessToken } = jsyaml.load(config);
                 fetchFileList(); // 설정을 불러온 후 파일 목록을 가져옴
             } else {
-                console.error('config.json을 가져오는 데 실패했습니다:', await response.json());
+                console.error('config.yaml을 가져오는 데 실패했습니다:', await response.json());
             }
         }
 
