@@ -9,19 +9,9 @@
     <h1>파일 다운로드</h1>
     
     <!-- category.txt 다운로드 버튼 -->
-    <p><a id="download-category" href="category.gz" download>category.txt 다운로드</a></p>
+    <p><a href="category.gz" download="category.txt">category.txt 다운로드</a></p>
     
     <!-- pattern.txt 다운로드 버튼 -->
-    <p><a href="pattern.txt" download>pattern.txt 다운로드</a></p>
-    
-    <script>
-        document.getElementById('download-category').addEventListener('click', function(event) {
-            event.preventDefault(); // 기본 링크 클릭 동작 방지
-            const link = document.createElement('a');
-            link.href = 'category.gz'; // 실제 파일 경로
-            link.download = 'category.txt'; // 다운로드할 파일 이름
-            link.click(); // 다운로드 시작
-        });
-    </script>
+    <p><a href="pattern.txt" download="pattern.txt">pattern.txt 다운로드</a></p>
 </body>
 </html>
