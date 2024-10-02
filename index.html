@@ -13,5 +13,170 @@
     
     <!-- pattern.txt 다운로드 버튼 -->
     <p><a href="pattern.txt" download="pattern.txt">pattern.txt 다운로드</a></p>
+
+    <h1>파일을 GitHub에 업로드</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">업로드</button>
+
+    <script>
+        let repoOwner, repoName, accessToken;
+
+        // JSON 파일에서 설정 불러오기
+        async function loadConfig() {
+            const response = await fetch('git_config.json');
+            if (response.ok) {
+                const config = await response.json();
+                repoOwner = config.repoOwner;
+                repoName = config.repoName;
+                accessToken = config.accessToken;
+                fetchFileList(); // 설정을 불러온 후 파일 목록을 가져옴
+            } else {
+                console.error('config.json을 가져오는 데 실패했습니다:', await response.json());
+            }
+        }
+
+        async function uploadFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const fileName = file.name;
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const content = event.target.result.split(',')[1]; // base64 인코딩
+                const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${fileName}`;
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${accessToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                    },
+                    body: JSON.stringify({
+                        message: `Upload ${fileName}`,
+                        content: content,
+                    }),
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    console.log('파일 업로드 성공:', jsonResponse);
+                } else {
+                    const errorResponse = await response.json();
+                    console.error('파일 업로드 실패:', errorResponse);
+                }
+            };
+            reader.readAsDataURL(file); // 파일을 base64로 읽기
+        }
+    </script>
+    <h1>리포지토리 파일 목록</h1>
+    <ul id="fileList"></ul>
+    <button onclick="deleteSelectedFiles()">선택한 파일 삭제</button>
+
+    <script>
+        // 파일 목록 가져오기
+        async function fetchFileList() {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (response.ok) {
+                const files = await response.json();
+                displayFileList(files);
+            } else {
+                console.error('파일 목록을 가져오는 데 실패했습니다:', await response.json());
+            }
+        }
+
+        // 파일 목록 가져오기
+        async function fetchFileList() {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (response.ok) {
+                const files = await response.json();
+                displayFileList(files);
+            } else {
+                console.error('파일 목록을 가져오는 데 실패했습니다:', await response.json());
+            }
+        }
+
+        // 파일 목록 표시
+        function displayFileList(files) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            files.forEach(file => {
+                const listItem = document.createElement('li');
+                const isDeletable = !['.gitignore', 'index.html', 'tts.py'].includes(file.name);
+                
+                listItem.innerHTML = `
+                    <input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'}>
+                    <span class="${isDeletable ? '' : 'disabled'}">${file.name}</span>
+                `;
+                fileList.appendChild(listItem);
+            });
+        }
+
+        // 선택한 파일 삭제
+        async function deleteSelectedFiles() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            for (const checkbox of checkboxes) {
+                const filePath = checkbox.value;
+                await deleteFile(filePath);
+            }
+            setTimeout(fetchFileList, 2000); // 1초 후 파일 목록 갱신
+        }
+
+        // 파일 삭제 함수
+        async function deleteFile(filePath) {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+                body: JSON.stringify({
+                    message: `Delete ${filePath}`,
+                    sha: await getFileSHA(filePath), // SHA를 가져와야 합니다.
+                }),
+            });
+
+            if (response.ok) {
+                console.log(`${filePath}가 성공적으로 삭제되었습니다.`);
+            } else {
+                console.error('파일 삭제 실패:', await response.json());
+            }
+        }
+
+        // 파일의 SHA를 가져오는 함수
+        async function getFileSHA(filePath) {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (response.ok) {
+                const fileInfo = await response.json();
+                return fileInfo.sha; // 파일의 SHA 반환
+            } else {
+                console.error('파일 SHA를 가져오는 데 실패했습니다:', await response.json());
+            }
+        }
+
+        // 페이지가 로드될 때 설정을 불러오기
+        window.onload = loadConfig;
+    </script>
 </body>
 </html>
