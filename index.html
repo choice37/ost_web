@@ -19,9 +19,9 @@
     <button onclick="uploadFile()">업로드</button>
 
     <script>
-        let repoOwner = "{{ site.repoOwner }}"; // Liquid 변수를 사용
-        let repoName = "{{ site.repoName }}"; // Liquid 변수를 사용
-        let accessToken = "{{ site.accessToken }}"; // Liquid 변수를 사용
+        let repoOwner = "{{ env.repoOwner }}"; // Liquid 변수를 사용
+        let repoName = "{{ env.repoName }}"; // Liquid 변수를 사용
+        let accessToken = "{{ env.accessToken }}"; // Liquid 변수를 사용
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
