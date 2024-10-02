@@ -19,32 +19,9 @@
     <button onclick="uploadFile()">업로드</button>
 
     <script>
-        let repoOwner, repoName, accessToken;
-
-        // JSON 파일에서 설정 불러오기
-        // async function loadConfig() {
-        //     const response = await fetch('git_config.json');
-        //     if (response.ok) {
-        //         const config = await response.json();
-        //         repoOwner = config.repoOwner;
-        //         repoName = config.repoName;
-        //         accessToken = config.accessToken;
-        //         fetchFileList(); // 설정을 불러온 후 파일 목록을 가져옴
-        //     } else {
-        //         console.error('config.json을 가져오는 데 실패했습니다:', await response.json());
-        //     }
-        // }
-        // yaml 파일에서 설정 불러오기
-        async function loadConfig() {
-            const response = await fetch('git_config.yaml');
-            if (response.ok) {
-                const config = await response.text();
-                const { repoOwner, repoName, accessToken } = jsyaml.load(config);
-                fetchFileList(); // 설정을 불러온 후 파일 목록을 가져옴
-            } else {
-                console.error('config.yaml을 가져오는 데 실패했습니다:', await response.json());
-            }
-        }
+        let repoOwner = "{{ site.repoOwner }}"; // Liquid 변수를 사용
+        let repoName = "{{ site.repoName }}"; // Liquid 변수를 사용
+        let accessToken = "{{ site.accessToken }}"; // Liquid 변수를 사용
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
