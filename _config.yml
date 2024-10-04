@@ -1,3 +1,3 @@
-repoOwner: "{{ site.env.repoOwner }}"
-repoName: "{{ site.env.repoName }}"
-accessToken: "{{ site.env.accessToken }}"
+repoOwner: "{{ ENV.repoOwner }}"
+repoName: "{{ ENV.repoName }}"
+accessToken: "{{ ENV.accessToken }}"
