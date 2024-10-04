@@ -59,6 +59,7 @@
             reader.onload = async function(event) {
                 const content = event.target.result.split(',')[1]; // base64 인코딩
                 const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${fileName}`;
+                console.log(url);
 
                 const response = await fetch(url, {
                     method: 'PUT',
@@ -87,6 +88,7 @@
         // 파일 목록 가져오기
         async function fetchFileList() {
             const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            console.log(url);
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `token ${accessToken}`,
