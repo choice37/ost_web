@@ -108,15 +108,17 @@
         // 파일 목록 표시
         function displayFileList(files) {
             const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
+            fileList.innerHTML = ''; // 파일 목록 초기화
 
             files.forEach(file => {
                 const listItem = document.createElement('li');
                 const isDeletable = !['.gitignore', 'index.html', 'tts.py'].includes(file.name);
 
-                const checked = selectedFiles.has(file.path) ? 'checked' : '';
+                // 선택된 파일인지 확인
+                const isChecked = selectedFiles.has(file.path) ? 'checked' : '';
+
                 listItem.innerHTML = `
-                    <input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'}>
+                    <input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'} ${isChecked}>
                     <span class="${isDeletable ? '' : 'disabled'}">${file.name}</span>
                 `;
 
@@ -129,9 +131,10 @@
                     }
                 });
                 
-                fileList.appendChild(listItem);
+                fileList.appendChild(listItem); // 리스트에 추가
             });
         }
+
 
         // 선택한 파일 삭제
         async function deleteSelectedFiles() {
