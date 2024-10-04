@@ -41,6 +41,8 @@
 
                 // 가져온 값을 콘솔에 출력
                 console.log(repoOwner, repoName, accessToken);
+                fetchFileList(); // 페이지 로드 시 파일 목록 가져오기
+                setInterval(fetchFileList, 5000); // 5초마다 호출
             })
             .catch(error => {
                 console.error('Error fetching environment variables:', error);
@@ -59,7 +61,6 @@
             reader.onload = async function(event) {
                 const content = event.target.result.split(',')[1]; // base64 인코딩
                 const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${fileName}`;
-                console.log(url);
 
                 const response = await fetch(url, {
                     method: 'PUT',
@@ -88,7 +89,6 @@
         // 파일 목록 가져오기
         async function fetchFileList() {
             const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-            console.log(url);
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `token ${accessToken}`,
