@@ -177,27 +177,82 @@
 
             for (const checkbox of checkboxes) {
                 const filePath = checkbox.value;
-                const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`; // 'main' 브랜치를 사용하는 경우
 
-                // Fetch the file and create a Blob for download
-                const response = await fetch(downloadUrl);
+                // 파일인지 폴더인지 확인하기 위한 API 호출
+                const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${accessToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                    },
+                });
+
                 if (!response.ok) {
-                    console.error(`파일 다운로드 실패: ${filePath}`, await response.json());
+                    console.error(`파일 또는 폴더 정보를 가져오는 데 실패했습니다: ${filePath}`, await response.json());
                     continue;
                 }
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                
-                // Create a temporary anchor element to trigger download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filePath; // 다운로드 파일명
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url); // Blob URL 해제
+
+                const fileData = await response.json();
+
+                // 파일인지 폴더인지 확인
+                if (fileData.type === 'file') {
+                    // 파일 다운로드
+                    const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`;
+                    await downloadFile(downloadUrl, filePath);
+                } else if (fileData.type === 'dir') {
+                    // 폴더인 경우, 폴더 내의 모든 파일 다운로드
+                    await downloadFolderContents(filePath);
+                }
             }
         }
+
+        // 특정 URL에서 파일 다운로드하는 함수
+        async function downloadFile(url, filePath) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.error(`파일 다운로드 실패: ${filePath}`, await response.json());
+                return;
+            }
+            const blob = await response.blob();
+            const urlBlob = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = urlBlob;
+            a.download = filePath;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(urlBlob);
+        }
+
+        // 폴더 내 모든 파일 다운로드 함수
+        async function downloadFolderContents(folderPath) {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${accessToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                },
+            });
+
+            if (!response.ok) {
+                console.error(`폴더 내용을 가져오는 데 실패했습니다: ${folderPath}`, await response.json());
+                return;
+            }
+
+            const files = await response.json();
+
+            for (const file of files) {
+                if (file.type === 'file') {
+                    const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${file.path}`;
+                    await downloadFile(downloadUrl, file.path);
+                } else if (file.type === 'dir') {
+                    // 하위 폴더가 있는 경우, 재귀적으로 호출
+                    await downloadFolderContents(file.path);
+                }
+            }
+        }
+
 
         // 파일의 SHA를 가져오는 함수
         async function getFileSHA(filePath) {
