@@ -22,7 +22,7 @@
         let repoOwner = "{{ site.repoOwner }}";
         let repoName = "{{ site.repoName }}";
         let accessToken = "{{ site.accessToken }}"; // 변수 사용
-        console.log(accessToken);
+        console.log(repoName);
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
