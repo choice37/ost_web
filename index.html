@@ -17,20 +17,13 @@
     <h1>파일을 GitHub에 업로드</h1>
     <input type="file" id="fileInput" />
     <button onclick="uploadFile()">업로드</button>
-    <!-- 변수를 HTML 속성에 먼저 할당 -->
-    <div id="repoData" 
-         data-repo-owner="{{ site.repoOwner }}" 
-         data-repo-name="{{ site.repoName }}" 
-         data-access-token="{{ site.accessToken }}"></div>
 
     <script>
-        // HTML 속성에서 변수를 가져오기
-        const repoData = document.getElementById('repoData');
-        const repoOwner = repoData.getAttribute('data-repo-owner');
-        const repoName = repoData.getAttribute('data-repo-name');
-        const accessToken = repoData.getAttribute('data-access-token');
-
-        console.log(accessToken); // 제대로 값이 출력되는지 확인
+        let repoOwner = "{{ process.env.repoOwner }}";
+        let repoName = "{{ site.repoName }}";
+        let accessToken = "{{ site.accessToken }}"; // 변수 사용
+        console.log(repoOwner);
+        console.log(accessToken);
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
