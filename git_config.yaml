@@ -1,3 +1,0 @@
-repoOwner: "<%= ENV['repoOwner'] %>"
-repoName: "<%= ENV['repoName'] %>"
-accessToken: "<%= ENV['accessToken'] %>"
