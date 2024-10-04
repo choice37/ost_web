@@ -24,16 +24,6 @@
         let accessToken = "{{ site.accessToken }}"; // 변수 사용
         console.log(repoOwner);
         console.log(accessToken);
-        // 서버리스 함수를 호출하여 accessToken 값 가져오기
-        fetch('/.netlify/functions/getAccessToken')
-        .then(response => response.json())
-        .then(data => {
-            console.log("Access Token:", data.accessToken);
-            // 여기서 accessToken으로 추가 작업 수행 가능
-        })
-        .catch(error => {
-            console.error("Error fetching access token:", error);
-        });
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
