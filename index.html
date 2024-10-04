@@ -25,6 +25,16 @@
         console.log(repoOwner);
         console.log(accessToken);
 
+        // Netlify Function 호출
+        fetch('/.netlify/functions/getApiKey')
+        .then(response => response.json())
+        .then(data => {
+            const accessToken = data.accessToken;
+            console.log('accessToken :', accessToken);
+            // 이 apiKey를 사용하여 추가 작업을 처리
+        })
+        .catch(error => console.error('Error:', error));
+
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
             const fileName = file.name;
