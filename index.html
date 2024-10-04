@@ -19,21 +19,24 @@
     <button onclick="uploadFile()">업로드</button>
 
     <script>
-        let repoOwner = "{{ site.env.repoOwner }}";
-        let repoName = "{{ site.repoName }}";
-        let accessToken = "{{ site.accessToken }}"; // 변수 사용
-        console.log(repoOwner);
-        console.log(accessToken);
-
-        // Netlify Function 호출
-        fetch('/.netlify/functions/getApiKey')
-        .then(response => response.json())
-        .then(data => {
-            const accessToken = data.accessToken;
-            console.log('accessToken :', accessToken);
-            // 이 apiKey를 사용하여 추가 작업을 처리
+        fetch('/.netlify/functions/getEnvVariables')  // Netlify Function 호출
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();  // JSON으로 응답받기
         })
-        .catch(error => console.error('Error:', error));
+        .then(data => {
+            let repoOwner = data.repoOwner;  // 함수에서 받은 값 할당
+            let repoName = data.repoName;
+            let accessToken = data.accessToken;
+
+            // 이제 여기서 repoOwner, repoName, accessToken을 사용할 수 있습니다.
+            console.log(repoOwner, repoName, accessToken);
+        })
+        .catch(error => {
+            console.error('Error fetching environment variables:', error);
+        });
 
         async function uploadFile() {
             const file = document.getElementById('fileInput').files[0];
