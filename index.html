@@ -19,9 +19,9 @@
     <button onclick="uploadFile()">업로드</button>
 
     <script>
-        let repoOwner = "{{ site.env.repoOwner }}"; // Liquid 변수를 사용
-        let repoName = "{{ site.env.repoName }}"; // Liquid 변수를 사용
-        let accessToken = "{{ site.env.accessToken }}"; // Liquid 변수를 사용
+        let repoOwner = "{{ site.repoOwner }}";
+        let repoName = "{{ site.repoName }}";
+        let accessToken = "{{ site.accessToken }}"; // 변수 사용
         console.log(accessToken);
 
         async function uploadFile() {
