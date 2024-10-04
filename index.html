@@ -27,6 +27,7 @@
     <script>
         // 환경변수를 저장할 전역 변수
         let repoOwner, repoName, accessToken;
+        const selectedFiles = new Set(); // 선택한 파일을 저장하는 Set
 
         // 환경변수를 가져오는 함수
         fetch('/.netlify/functions/getEnvVariables')  // Netlify Function 호출
@@ -112,11 +113,22 @@
             files.forEach(file => {
                 const listItem = document.createElement('li');
                 const isDeletable = !['.gitignore', 'index.html', 'tts.py'].includes(file.name);
-                
+
+                const checked = selectedFiles.has(file.path) ? 'checked' : '';
                 listItem.innerHTML = `
                     <input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'}>
                     <span class="${isDeletable ? '' : 'disabled'}">${file.name}</span>
                 `;
+
+                // 체크박스 클릭 이벤트 추가
+                listItem.querySelector('input[type="checkbox"]').addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        selectedFiles.add(file.path); // 체크된 파일 추가
+                    } else {
+                        selectedFiles.delete(file.path); // 체크 해제된 파일 삭제
+                    }
+                });
+                
                 fileList.appendChild(listItem);
             });
         }
@@ -164,13 +176,23 @@
                 const filePath = checkbox.value;
                 const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`; // 'main' 브랜치를 사용하는 경우
 
-                // 링크를 만들어 다운로드를 트리거합니다.
+                // Fetch the file and create a Blob for download
+                const response = await fetch(downloadUrl);
+                if (!response.ok) {
+                    console.error(`파일 다운로드 실패: ${filePath}`, await response.json());
+                    continue;
+                }
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                // Create a temporary anchor element to trigger download
                 const a = document.createElement('a');
-                a.href = downloadUrl;
+                a.href = url;
                 a.download = filePath; // 다운로드 파일명
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Blob URL 해제
             }
         }
 
