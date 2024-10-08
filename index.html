@@ -3,28 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파일 다운로드~</title>
+    <title>블로그 스타일 웹사이트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #444;
+        }
+        nav a {
+            color: #fff;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        nav a:hover {
+            background-color: #555;
+        }
+        main {
+            padding: 20px;
+        }
+        section {
+            display: none; /* 모든 섹션을 기본적으로 숨김 */
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h1>파일 다운로드~</h1>
-    
-    <!-- category.txt 다운로드 버튼 -->
-    <p><a href="category.txt" download="category.txt">category.txt 다운로드</a></p>
-    
-    <!-- pattern.txt 다운로드 버튼 -->
-    <p><a href="pattern.txt" download="pattern.txt">pattern.txt 다운로드</a></p>
+    <header>
+        <h1>블로그 스타일 웹사이트</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="showSection('git')">Git 데이터 관리</a>
+        <a href="#" onclick="showSection('real-estate')">부동산</a>
+        <a href="#" onclick="showSection('stocks')">주식</a>
+        <a href="#" onclick="showSection('wedding')">결혼식</a>
+    </nav>
+    <main>
+        <section id="git">
+            <h1>Git 데이터 관리</h1>
+            <!-- Git 데이터 관리 기능 -->
+            <input type="file" id="fileInput" />
+            <button onclick="uploadFile()">파일 업로드</button>
 
-    <h1>파일을 GitHub에 업로드</h1>
-    <input type="file" id="fileInput" />
-    <button onclick="uploadFile()">파일 업로드</button>
+            <h2>리포지토리 파일 목록</h2>
+            <ul id="fileList"></ul>
+            <button onclick="deleteSelectedFiles()">선택한 파일 삭제</button>
+            <button onclick="downloadSelectedFiles()">선택한 파일 다운로드</button>
+        </section>
 
-    <h1>리포지토리 파일 목록</h1>
-    <ul id="fileList"></ul>
-    <button onclick="deleteSelectedFiles()">선택한 파일 삭제</button>
-    <button onclick="downloadSelectedFiles()">선택한 파일 다운로드</button>
+        <section id="real-estate">
+            <h1>부동산</h1>
+            <p>부동산 관련 내용이 여기에 표시됩니다.</p>
+        </section>
 
+        <section id="stocks">
+            <h1>주식</h1>
+            <p>주식 관련 내용이 여기에 표시됩니다.</p>
+        </section>
+
+        <section id="wedding">
+            <h1>결혼식</h1>
+            <p>결혼식 관련 내용이 여기에 표시됩니다.</p>
+        </section>
+    </main>
 
     <script>
+        // 페이지 로드 시 Git 데이터 관리 섹션을 기본으로 표시
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('git');
+        });
+
+        // 섹션을 표시하는 함수
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                section.style.display = 'none'; // 모든 섹션 숨기기
+            });
+            document.getElementById(sectionId).style.display = 'block'; // 선택한 섹션만 표시
+        }
+
         // 환경변수를 저장할 전역 변수
         let repoOwner, repoName, accessToken;
         const selectedFiles = new Set(); // 선택한 파일을 저장하는 Set
