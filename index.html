@@ -45,6 +45,29 @@
         h1 {
             color: #333;
         }
+        /* 주식 표 스타일 */
+        #stocksTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #stocksTable th, #stocksTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        #stocksTable th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        .true-value {
+            background-color: #d4edda; /* 녹색 배경 */
+            color: #155724; /* 녹색 글자 */
+        }
+        .false-value {
+            background-color: #f8d7da; /* 빨간색 배경 */
+            color: #721c24; /* 빨간색 글자 */
+        }
     </style>
 </head>
 <body>
@@ -391,7 +414,6 @@
                     })
                 });
                 const data = await response.json(); // 서버리스 함수에서 받은 데이터를 JSON으로 변환
-                console.log(data);
                 return data;
             } catch (error) {
                 console.error('Error fetching data from serverless function:', error);
@@ -422,6 +444,16 @@
                 desiredColumns.forEach(column => {
                     const cell = document.createElement('td');
                     cell.textContent = record[column];
+
+                    // 수익여부��� 2차매수에 ���라 스타일 적용
+                    if (column === '수익여부' || column === '2차매수') {
+                        if (record[column] === 'TRUE') {
+                            cell.classList.add('true-value');
+                        } else if (record[column] === 'FALSE') {
+                            cell.classList.add('false-value');
+                        }
+                    }
+
                     row.appendChild(cell);
                 });
                 tableBody.appendChild(row);
