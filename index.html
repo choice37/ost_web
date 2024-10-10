@@ -391,6 +391,7 @@
                     })
                 });
                 const data = await response.json(); // 서버리스 함수에서 받은 데이터를 JSON으로 변환
+                console.log(data);
                 return data;
             } catch (error) {
                 console.error('Error fetching data from serverless function:', error);
@@ -401,9 +402,10 @@
         // Google Sheets API에서 데이터 가져와서 처리하는 함수
         fetchGoogleSheetData("1sscViRHXKS1t9SRHkvqtfJ8Q5HswyaeTFGT2jv8yUhQ", "단기스윙").then(records => {
             const headers = records[0];
+            console.log(headers);
             const desiredColumns = ['종목명', '날짜', '수익여부', '2차매수'];
             const desiredIndexes = desiredColumns.map(col => headers.indexOf(col));
-    
+            console.log(desiredIndexes);
             const filteredRecords = records.slice(1).map(row => {
                 let filteredRow = {};
                 desiredIndexes.forEach((index, i) => {
