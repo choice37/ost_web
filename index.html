@@ -133,6 +133,12 @@
                 return; // 파일이 없을 경우 조기 리턴
             }
 
+            // 로딩 메시지 표시
+            const loadingMessage = document.createElement('div');
+            loadingMessage.id = 'loadingMessage';
+            loadingMessage.textContent = '파일 업로드 중...';
+            document.body.appendChild(loadingMessage);
+
             const fileName = file.name;
             const reader = new FileReader();
             reader.onload = async function(event) {
@@ -150,6 +156,9 @@
                         content: content,
                     }),
                 });
+
+                // 로딩 메시지 숨기기
+                document.body.removeChild(loadingMessage);
 
                 if (response.ok) {
                     const jsonResponse = await response.json();
@@ -242,8 +251,11 @@
 
             if (response.ok) {
                 console.log(`${filePath}가 성공적으로 삭제되었습니다.`);
+                alert(`${filePath}가 성공적으로 삭제되었습니다.`); // 성공 알림 추가
             } else {
-                console.error('파일 삭제 실패:', await response.json());
+                const errorResponse = await response.json();
+                console.error('파일 삭제 실패:', errorResponse);
+                alert('파일 삭제 실패: ' + errorResponse.message); // 실패 알림 추가
             }
         }
 
