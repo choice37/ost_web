@@ -377,15 +377,33 @@
         window.onload = fetchFileList; // 페이지 로드 시 파일 목록을 불러옵니다.
     </script>
     <script type="module">
-        // Google Sheets API를 사용하여 데이터 가져오기
-        import { GoogleSheet } from './googleAPI.js';
-        const worksheet = new GoogleSheet("매매기법 검증2", "단기스윙");
-
-        worksheet.getAllRecords().then(records => {
+        // 서버리스 함수에서 Google Sheets 데이터를 가져오는 함수
+        async function fetchGoogleSheetData(sheetName, worksheetName) {
+            try {
+                const response = await fetch('/.netlify/functions/googleAPI', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sheetName: sheetName,      // 시트 ID 또는 이름
+                        worksheetName: worksheetName  // 워크시트 이름
+                    })
+                });
+                const data = await response.json(); // 서버리스 함수에서 받은 데이터를 JSON으로 변환
+                return data;
+            } catch (error) {
+                console.error('Error fetching data from serverless function:', error);
+                throw error;
+            }
+        }
+    
+        // Google Sheets API에서 데이터 가져와서 처리하는 함수
+        fetchGoogleSheetData("1sscViRHXKS1t9SRHkvqtfJ8Q5HswyaeTFGT2jv8yUhQ", "단기스윙").then(records => {
             const headers = records[0];
             const desiredColumns = ['종목명', '날짜', '수익여부', '2차매수'];
             const desiredIndexes = desiredColumns.map(col => headers.indexOf(col));
-
+    
             const filteredRecords = records.slice(1).map(row => {
                 let filteredRow = {};
                 desiredIndexes.forEach((index, i) => {
@@ -393,10 +411,10 @@
                 });
                 return filteredRow;
             });
-
+    
             // 날짜 역순으로 정렬
             filteredRecords.sort((a, b) => new Date(b['날짜']) - new Date(a['날짜']));
-
+    
             // 표에 데이터 추가
             const tableBody = document.querySelector('#stocksTable tbody');
             filteredRecords.forEach(record => {
@@ -412,5 +430,6 @@
             console.error('Error fetching records:', error);
         });
     </script>
+    
 </body>
 </html>
