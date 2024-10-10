@@ -19,7 +19,7 @@ class GoogleSheet {
         // const credentials = JSON.parse(fs.readFileSync('bgm-537-b9fa3d50e755.json'));
         // const { client_email, private_key } = credentials;
         const client_email = process.env.client_email;  // 환경변수에서 repoOwner 가져오기
-        const private_key = process.env.private_key;    // 환경변수에서 repoName 가져오기
+        const private_key = process.env.private_key.replace(/\\n/g, '\n');;    // 환경변수에서 repoName 가져오기
         console.log(client_email);
 
         const auth = new google.auth.JWT({
