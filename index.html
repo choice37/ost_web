@@ -77,7 +77,19 @@
 
         <section id="stocks">
             <h1>주식</h1>
-            <p>주식 관련 내용이 여기에 표시됩니다.</p>
+            <table id="stocksTable">
+                <thead>
+                    <tr>
+                        <th>종목명</th>
+                        <th>날짜</th>
+                        <th>수익여부</th>
+                        <th>2차매수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 데이터가 여기에 추가됩니다 -->
+                </tbody>
+            </table>
         </section>
 
         <section id="wedding">
@@ -363,6 +375,42 @@
             }
         }
         window.onload = fetchFileList; // 페이지 로드 시 파일 목록을 불러옵니다.
+    </script>
+    <script type="module">
+        // Google Sheets API를 사용하여 데이터 가져오기
+        import { GoogleSheet } from './googleAPI.js';
+        const worksheet = new GoogleSheet("매매기법 검증2", "단기스윙");
+
+        worksheet.getAllRecords().then(records => {
+            const headers = records[0];
+            const desiredColumns = ['종목명', '날짜', '수익여부', '2차매수'];
+            const desiredIndexes = desiredColumns.map(col => headers.indexOf(col));
+
+            const filteredRecords = records.slice(1).map(row => {
+                let filteredRow = {};
+                desiredIndexes.forEach((index, i) => {
+                    filteredRow[desiredColumns[i]] = row[index];
+                });
+                return filteredRow;
+            });
+
+            // 날짜 역순으로 정렬
+            filteredRecords.sort((a, b) => new Date(b['날짜']) - new Date(a['날짜']));
+
+            // 표에 데이터 추가
+            const tableBody = document.querySelector('#stocksTable tbody');
+            filteredRecords.forEach(record => {
+                const row = document.createElement('tr');
+                desiredColumns.forEach(column => {
+                    const cell = document.createElement('td');
+                    cell.textContent = record[column];
+                    row.appendChild(cell);
+                });
+                tableBody.appendChild(row);
+            });
+        }).catch(error => {
+            console.error('Error fetching records:', error);
+        });
     </script>
 </body>
 </html>
