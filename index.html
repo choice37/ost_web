@@ -80,9 +80,6 @@
             background-color: #e2e3e5; /* 회색 배경 */
             color: #383d41; /* 회색 글자 */
         }
-        .blurred {
-            filter: blur(5px); /* 블러 효과 적용 */
-        }
     </style>
 </head>
 <body>
@@ -456,9 +453,9 @@
             const tableBody = document.querySelector('#stocksTable tbody');
             filteredRecords.forEach(record => {
                 const row = document.createElement('tr');
-                headers.forEach((column, index) => {
+                desiredColumns.forEach(column => {
                     const cell = document.createElement('td');
-                    cell.textContent = record[column] || ''; // 데이터가 없으면 빈 문자열
+                    cell.textContent = record[column];
 
                     // 수익여부와 2차매수에 따라 스타일 적용
                     if (column === '수익여부') {
@@ -475,8 +472,6 @@
                         } else if (record[column] === 'FALSE') {
                             cell.classList.add('false-value');
                         }
-                    } else if (!desiredColumns.includes(column)) {
-                        cell.classList.add('blurred'); // 블러 처리
                     }
 
                     row.appendChild(cell);
