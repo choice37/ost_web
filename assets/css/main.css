@@ -1536,18 +1536,9 @@ input[type="checkbox"] {
 /* List */
 
 	ul {
-		list-style: disc;
 		padding-left: 1em;
 	}
 
-		ul li {
-			padding-left: 0.5em;
-			margin: 0.75em 0 0.75em 0;
-		}
-
-			ul li:first-child {
-				margin-top: 0;
-			}
 
 	ol {
 		list-style: decimal;
@@ -2090,7 +2081,7 @@ input[type="checkbox"] {
 		position: relative;
 		overflow: hidden;
 		background: #fff;
-		text-align: center;
+		text-align: left;
 		padding: 6em 0;
 	}
 
