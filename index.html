@@ -35,316 +35,284 @@
 					</div>
 				</section>
 
-			<!-- Features -->
-				<section id="features">
+			<!-- Git Data Management -->
+				<section id="git">
 					<div class="container">
-						<header>
-							<h2>Gentlemen, behold! This is <strong>Strongly Typed</strong>!</h2>
-						</header>
-						<div class="row aln-center">
-							<div class="col-4 col-6-medium col-12-small">
+						<h1>Git 데이터 관리</h1>
+						<!-- Git 데이터 관리 기능 -->
+						<input type="file" id="fileInput" />
+						<button onclick="uploadFile()">파일 업로드</button>
 
-								<!-- Feature -->
-									<section>
-										<a href="#" class="image featured"><img src="images/pic01.jpg" alt="" /></a>
-										<header>
-											<h3>Okay, so what is this?</h3>
-										</header>
-										<p>This is <strong>Strongly Typed</strong>, a free, fully responsive site template
-										by <a href="http://html5up.net">HTML5 UP</a>. Free for personal and commercial use under the
-										<a href="http://html5up.net/license">CCA 3.0 license</a>.</p>
-									</section>
-
-							</div>
-							<div class="col-4 col-6-medium col-12-small">
-
-								<!-- Feature -->
-									<section>
-										<a href="#" class="image featured"><img src="images/pic02.jpg" alt="" /></a>
-										<header>
-											<h3>Nice! What is HTML5 UP?</h3>
-										</header>
-										<p><a href="http://html5up.net">HTML5 UP</a> is a side project of <a href="http://twitter.com/ajlkn">AJ’s</a> (= me).
-										I started it as a way to both test my responsive tools and sharpen up my coding
-										and design skills a bit.</p>
-									</section>
-
-							</div>
-							<div class="col-4 col-6-medium col-12-small">
-
-								<!-- Feature -->
-									<section>
-										<a href="#" class="image featured"><img src="images/pic03.jpg" alt="" /></a>
-										<header>
-											<h3>What's this built with?</h3>
-										</header>
-										<p><strong>Responsive Tools</strong> is a simple set of tools for building responsive
-										sites and apps. All of my templates at <a href="http://html5up.net">HTML5 UP</a> are built using these tools.</p>
-									</section>
-
-							</div>
-							<div class="col-12">
-								<ul class="actions">
-									<li><a href="#" class="button icon solid fa-file">Tell Me More</a></li>
-								</ul>
-							</div>
-						</div>
+						<h2>리포지토리 파일 목록</h2>
+						<ul id="fileList"></ul>
+						<button onclick="deleteSelectedFiles()">선택한 파일 삭제</button>
+						<button onclick="downloadSelectedFiles()">선택한 파일 다운로드</button>
 					</div>
 				</section>
 
-			<!-- Banner -->
-				<section id="banner">
-					<div class="container">
-						<p>Use this space for <strong>profound thoughts</strong>.<br />
-						Or an enormous ad. Whatever.</p>
-					</div>
-				</section>
+			<!-- Scripts -->
+			<script>
+				// 환경변수를 저장할 전역 변수
+				let repoOwner, repoName, accessToken;
+				const selectedFiles = new Set(); // 선택한 파일을 저장하는 Set
 
-			<!-- Main -->
-				<section id="main">
-					<div class="container">
-						<div class="row">
+				// 환경변수를 가져오는 함수
+				fetch('/.netlify/functions/getEnvVariables')  // Netlify Function 호출
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+						return response.json();  // JSON으로 응답받기
+					})
+					.then(data => {
+						repoOwner = data.repoOwner;  // 함수에서 받은 값 할당
+						repoName = data.repoName;
+						accessToken = data.accessToken;
 
-							<!-- Content -->
-								<div id="content" class="col-8 col-12-medium">
+						fetchFileList(); // 페이지 로드 시 파일 목록 가져오기
+						setInterval(fetchFileList, 5000); // 5초마다 호출
+					})
+					.catch(error => {
+						console.error('Error fetching environment variables:', error);
+					});
 
-									<!-- Post -->
-										<article class="box post">
-											<header>
-												<h2><a href="#">I don’t want to say <strong>it’s the aliens</strong> ...<br />
-												but it’s the aliens.</a></h2>
-											</header>
-											<a href="#" class="image featured"><img src="images/pic04.jpg" alt="" /></a>
-											<h3>I mean isn't it possible?</h3>
-											<p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit
-											ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris
-											sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada
-											in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-											magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros
-											consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-											justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet
-											mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique.
-											Curabitur leo nibh, rutrum eu malesuada in tristique.</p>
-											<ul class="actions">
-												<li><a href="#" class="button icon solid fa-file">Continue Reading</a></li>
-											</ul>
-										</article>
+				// 파일 업로드 함수
+				async function uploadFile() {
+					const file = document.getElementById('fileInput').files[0];
+					if (!file) {
+						alert('파일을 선택하세요.'); // 파일 선택하지 않은 경우
+						return; // 파일이 없을 경우 조기 리턴
+					}
 
-									<!-- Post -->
-										<article class="box post">
-											<header>
-												<h2><a href="#">By the way, many thanks to <strong>regularjane</strong>
-												for these awesome demo photos</a></h2>
-											</header>
-											<a href="#" class="image featured"><img src="images/pic05.jpg" alt="" /></a>
-											<h3>You should probably check out her work</h3>
-											<p>Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit
-											ligula vel quam viverra sit amet mollis tortor congue. Sed quis mauris
-											sit amet magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada
-											in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-											consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-											in, tristique at erat lorem ipsum dolor sit amet lorem ipsum sed consequat
-											magna tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros
-											consequat magna tempus lorem ipsum consequat Phasellus laoreet massa id
-											justo mattis pharetra. Fusce suscipit ligula vel quam viverra sit amet
-											mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique.
-											Curabitur leo nibh, rutrum malesuada.</p>
-											<p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat
-											Phasellus laoreet massa id justo mattis pharetra. Fusce suscipit ligula
-											vel quam viverra sit amet mollis tortor congue. Sed quis mauris sit amet
-											magna accumsan tristique. Curabitur leo nibh, rutrum eu malesuada in,
-											tristique at erat. Curabitur leo nibh, rutrum eu malesuada in, tristique
-											at erat lorem ipsum dolor sit amet lorem ipsum sed consequat magna
-											tempus veroeros lorem sed tempus aliquam lorem ipsum veroeros consequat
-											magna tempus.</p>
-											<ul class="actions">
-												<li><a href="#" class="button icon solid fa-file">Continue Reading</a></li>
-											</ul>
-										</article>
+					// 로딩 메시지 표시
+					const loadingMessage = document.createElement('div');
+					loadingMessage.id = 'loadingMessage';
+					loadingMessage.textContent = '파일 업로드 중...';
+					document.body.appendChild(loadingMessage);
 
-								</div>
+					const fileName = file.name;
+					const reader = new FileReader();
+					reader.onload = async function(event) {
+						const content = event.target.result.split(',')[1]; // base64 인코딩
+						const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${fileName}`;
 
-							<!-- Sidebar -->
-								<div id="sidebar" class="col-4 col-12-medium">
+						const response = await fetch(url, {
+							method: 'PUT',
+							headers: {
+								'Authorization': `token ${accessToken}`,
+								'Accept': 'application/vnd.github.v3+json',
+							},
+							body: JSON.stringify({
+								message: `Upload ${fileName}`,
+								content: content,
+							}),
+						});
 
-									<!-- Excerpts -->
-										<section>
-											<ul class="divided">
-												<li>
+						// 로딩 메시지 숨기기
+						document.body.removeChild(loadingMessage);
 
-													<!-- Excerpt -->
-														<article class="box excerpt">
-															<header>
-																<span class="date">July 30</span>
-																<h3><a href="#">Just another post</a></h3>
-															</header>
-															<p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-															suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-														</article>
+						if (response.ok) {
+							const jsonResponse = await response.json();
+							console.log('파일 업로드 성공:', jsonResponse);
+							alert('파일 업로드 성공!'); // 성공 알림
+							fetchFileList(); // 파일 목록 갱신
+						} else {
+							const errorResponse = await response.json();
+							console.error('파일 업로드 실패:', errorResponse);
+							alert('파일 업로드 실패: ' + errorResponse.message); // 실패 알림
+						}
+					};
+					reader.readAsDataURL(file); // 파일을 base64로 읽기
+				}
 
-												</li>
-												<li>
+				// 파일 목록 가져오기
+				async function fetchFileList() {
+					const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+					const response = await fetch(url, {
+						headers: {
+							'Authorization': `token ${accessToken}`,
+							'Accept': 'application/vnd.github.v3+json',
+						},
+					});
 
-													<!-- Excerpt -->
-														<article class="box excerpt">
-															<header>
-																<span class="date">July 28</span>
-																<h3><a href="#">And another post</a></h3>
-															</header>
-															<p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-															suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-														</article>
+					if (response.ok) {
+						const files = await response.json();
+						displayFileList(files);
+					} else {
+						console.error('파일 목록을 가져오는 데 실패했습니다:', await response.json());
+					}
+				}
 
-												</li>
-												<li>
+				// 파일 목록 표시
+				function displayFileList(files) {
+					const fileList = document.getElementById('fileList');
+					fileList.innerHTML = ''; // 파일 목록 초기화
 
-													<!-- Excerpt -->
-														<article class="box excerpt">
-															<header>
-																<span class="date">July 24</span>
-																<h3><a href="#">One more post</a></h3>
-															</header>
-															<p>Lorem ipsum dolor odio facilisis convallis. Etiam non nunc vel est
-															suscipit convallis non id orci lorem ipsum sed magna consequat feugiat lorem dolore.</p>
-														</article>
+					files.forEach(file => {
+						const listItem = document.createElement('li');
+						const isDeletable = !['.gitignore', 'index.html', 'tts.py'].includes(file.name);
 
-												</li>
-											</ul>
-										</section>
+						// 선택된 파일인지 확인
+						const isChecked = selectedFiles.has(file.path) ? 'checked' : '';
 
-									<!-- Highlights -->
-										<section>
-											<ul class="divided">
-												<li>
+						listItem.innerHTML = `
+							<input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'} ${isChecked}>
+							<span class="${isDeletable ? '' : 'disabled'}">${file.name}</span>
+						`;
 
-													<!-- Highlight -->
-														<article class="box highlight">
-															<header>
-																<h3><a href="#">Something of note</a></h3>
-															</header>
-															<a href="#" class="image left"><img src="images/pic06.jpg" alt="" /></a>
-															<p>Phasellus sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam
-															viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis
-															convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus
-															facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
-															<ul class="actions">
-																<li><a href="#" class="button icon solid fa-file">Learn More</a></li>
-															</ul>
-														</article>
+						// 체크박스 클릭 이벤트 추가
+						listItem.querySelector('input[type="checkbox"]').addEventListener('change', (event) => {
+							if (event.target.checked) {
+								selectedFiles.add(file.path); // 체크된 파일 추가
+							} else {
+								selectedFiles.delete(file.path); // 체크 해제된 파일 삭제
+							}
+						});
+						
+						fileList.appendChild(listItem); // 리스트에 추가
+					});
+				}
 
-												</li>
-												<li>
+				// 선택한 파일 삭제
+				async function deleteSelectedFiles() {
+					const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+					for (const checkbox of checkboxes) {
+						const filePath = checkbox.value;
+						await deleteFile(filePath);
+					}
+					fetchFileList(); // 파일 목록 갱신
+				}
 
-													<!-- Highlight -->
-														<article class="box highlight">
-															<header>
-																<h3><a href="#">Something of less note</a></h3>
-															</header>
-															<a href="#" class="image left"><img src="images/pic07.jpg" alt="" /></a>
-															<p>Phasellus sed laoreet massa id justo mattis pharetra. Fusce suscipit ligula vel quam
-															viverra sit amet mollis tortor congue magna lorem ipsum dolor et quisque ut odio facilisis
-															convallis. Etiam non nunc vel est suscipit convallis non id orci. Ut interdum tempus
-															facilisis convallis. Etiam non nunc vel est suscipit convallis non id orci.</p>
-															<ul class="actions">
-																<li><a href="#" class="button icon solid fa-file">Learn More</a></li>
-															</ul>
-														</article>
+				// 파일 삭제 함수
+				async function deleteFile(filePath) {
+					const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+					const response = await fetch(url, {
+						method: 'DELETE',
+						headers: {
+							'Authorization': `token ${accessToken}`,
+							'Accept': 'application/vnd.github.v3+json',
+						},
+						body: JSON.stringify({
+							message: `Delete ${filePath}`,
+							sha: await getFileSHA(filePath), // SHA를 가져와야 합니다.
+						}),
+					});
 
-												</li>
-											</ul>
-										</section>
+					if (response.ok) {
+						console.log(`${filePath}가 성공적으로 삭제되었습니다.`);
+						alert(`${filePath}가 성공적으로 삭제되었습니다.`); // 성공 알림 추가
+					} else {
+						const errorResponse = await response.json();
+						console.error('파일 삭제 실패:', errorResponse);
+						alert('파일 삭제 실패: ' + errorResponse.message); // 실패 알림 추가
+					}
+				}
 
-								</div>
+				async function downloadSelectedFiles() {
+					const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+					if (checkboxes.length === 0) {
+						console.error('다운로드할 파일을 선택하세요.');
+						return;
+					}
 
-						</div>
-					</div>
-				</section>
+					for (const checkbox of checkboxes) {
+						const filePath = checkbox.value;
 
-			<!-- Footer -->
-				<section id="footer">
-					<div class="container">
-						<header>
-							<h2>Questions or comments? <strong>Get in touch:</strong></h2>
-						</header>
-						<div class="row">
-							<div class="col-6 col-12-medium">
-								<section>
-									<form method="post" action="#">
-										<div class="row gtr-50">
-											<div class="col-6 col-12-small">
-												<input name="name" placeholder="Name" type="text" />
-											</div>
-											<div class="col-6 col-12-small">
-												<input name="email" placeholder="Email" type="text" />
-											</div>
-											<div class="col-12">
-												<textarea name="message" placeholder="Message"></textarea>
-											</div>
-											<div class="col-12">
-												<a href="#" class="form-button-submit button icon solid fa-envelope">Send Message</a>
-											</div>
-										</div>
-									</form>
-								</section>
-							</div>
-							<div class="col-6 col-12-medium">
-								<section>
-									<p>Erat lorem ipsum veroeros consequat magna tempus lorem ipsum consequat Phaselamet
-									mollis tortor congue. Sed quis mauris sit amet magna accumsan tristique. Curabitur
-									leo nibh, rutrum eu malesuada.</p>
-									<div class="row">
-										<div class="col-6 col-12-small">
-											<ul class="icons">
-												<li class="icon solid fa-home">
-													1234 Somewhere Road<br />
-													Nashville, TN 00000<br />
-													USA
-												</li>
-												<li class="icon solid fa-phone">
-													(000) 000-0000
-												</li>
-												<li class="icon solid fa-envelope">
-													<a href="#">info@untitled.tld</a>
-												</li>
-											</ul>
-										</div>
-										<div class="col-6 col-12-small">
-											<ul class="icons">
-												<li class="icon brands fa-twitter">
-													<a href="#">@untitled</a>
-												</li>
-												<li class="icon brands fa-instagram">
-													<a href="#">instagram.com/untitled</a>
-												</li>
-												<li class="icon brands fa-dribbble">
-													<a href="#">dribbble.com/untitled</a>
-												</li>
-												<li class="icon brands fa-facebook-f">
-													<a href="#">facebook.com/untitled</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</section>
-							</div>
-						</div>
-					</div>
-					<div id="copyright" class="container">
-						<ul class="links">
-							<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-						</ul>
-					</div>
-				</section>
+						// 파일인지 폴더인지 확인하기 위한 API 호출
+						const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+						const response = await fetch(url, {
+							headers: {
+								'Authorization': `token ${accessToken}`,
+								'Accept': 'application/vnd.github.v3+json',
+							},
+						});
+
+						if (!response.ok) {
+							console.error(`파일 또는 폴더 정보를 가져오는 데 실패했습니다: ${filePath}`, await response.json());
+							continue;
+						}
+
+						const fileData = await response.json();
+
+						// 파일인지 폴더인지 확인
+						if (fileData.type === 'file') {
+							// 파일 다운로드
+							const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`;
+							await downloadFile(downloadUrl, filePath);
+						} else if (fileData.type === 'dir') {
+							// 폴더인 경우, 폴더 내의 모든 파일 다운로드
+							await downloadFolderContents(filePath);
+						}
+					}
+				}
+
+				// 특정 URL에서 파일 다운로드하는 함수
+				async function downloadFile(url, filePath) {
+					const response = await fetch(url);
+					if (!response.ok) {
+						console.error(`파일 다운로드 실패: ${filePath}`, await response.json());
+						return;
+					}
+					const blob = await response.blob();
+					const urlBlob = URL.createObjectURL(blob);
+
+					const a = document.createElement('a');
+					a.href = urlBlob;
+					a.download = filePath;
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					URL.revokeObjectURL(urlBlob);
+				}
+
+				// 폴더 내 모든 파일 다운로드 함수
+				async function downloadFolderContents(folderPath) {
+					const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`;
+					const response = await fetch(url, {
+						headers: {
+							'Authorization': `token ${accessToken}`,
+							'Accept': 'application/vnd.github.v3+json',
+						},
+					});
+
+					if (!response.ok) {
+						console.error(`폴더 내용을 가져오는 데 실패했습니다: ${folderPath}`, await response.json());
+						return;
+					}
+
+					const files = await response.json();
+
+					for (const file of files) {
+						if (file.type === 'file') {
+							const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${file.path}`;
+							await downloadFile(downloadUrl, file.path);
+						} else if (file.type === 'dir') {
+							// 하위 폴더가 있는 경우, 재귀적으로 호출
+							await downloadFolderContents(file.path);
+						}
+					}
+				}
+
+				// 파일의 SHA를 가져오는 함수
+				async function getFileSHA(filePath) {
+					const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+					const response = await fetch(url, {
+						headers: {
+							'Authorization': `token ${accessToken}`,
+							'Accept': 'application/vnd.github.v3+json',
+						},
+					});
+
+					if (!response.ok) {
+						console.error(`파일의 SHA를 가져오는 데 실패했습니다: ${filePath}`, await response.json());
+						return null;
+					}
+
+					const fileData = await response.json();
+					return fileData.sha;
+				}
+			</script>
 
 		</div>
-
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.dropotron.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
-
 	</body>
 </html>
