@@ -141,7 +141,7 @@
 					} else {
 						console.error('파일 목록을 가져오는 데 실패했습니다:', await response.json());
 					}
-				}
+					}
 
 				// 파일 목록 표시
 				function displayFileList(files) {
@@ -208,6 +208,7 @@
 					}
 				}
 
+				// 선택한 파일 다운로드
 				async function downloadSelectedFiles() {
 					const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
 					if (checkboxes.length === 0) {
