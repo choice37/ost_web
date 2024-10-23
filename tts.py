@@ -112,11 +112,8 @@ def text_to_speech(text, output_file, json_path, language_code="ko-KR", gender="
 # ]
 
 text_list =[
-    "황영웅의 당신편",
-    "조류인간 틀어줘",
-    "만수사화 틀어줘",
-    "메카우데 틀어줘",
-    "언제나 나였어 틀어줘"
+    "메이드",
+    "타임라인"
 ]
 
 list_path = "./list/daily_test"
