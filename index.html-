@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion API 글 등록</title>
+</head>
+<body>
+  <h1>Notion 데이터베이스에 글 등록</h1>
+
+  <form id="notionForm">
+    <label for="title">제목:</label><br>
+    <input type="text" id="title" name="title" required><br><br>
+
+    <label for="content">내용:</label><br>
+    <textarea id="content" name="content" rows="5" required></textarea><br><br>
+
+    <button type="submit">등록</button>
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+    document.getElementById("notionForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+      const responseElement = document.getElementById("response");
+
+      try {
+        const response = await fetch("/.netlify/functions/notion-handler", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, content }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          responseElement.textContent = `성공적으로 등록되었습니다! Notion 페이지: ${result.url}`;
+          responseElement.style.color = "green";
+        } else {
+          responseElement.textContent = `오류 발생: ${result.message}`;
+          responseElement.style.color = "red";
+        }
+      } catch (error) {
+        responseElement.textContent = `네트워크 오류: ${error.message}`;
+        responseElement.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
