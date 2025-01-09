@@ -1,414 +1,56 @@
-<!DOCTYPE HTML>
-<!--
-	Strongly Typed by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Strongly Typed by HTML5 UP</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-	</head>
-	<body class="homepage is-preload">
-		<div id="page-wrapper">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion API 글 등록</title>
+</head>
+<body>
+  <h1>Notion 데이터베이스에 글 등록</h1>
 
-			<!-- Header -->
-				<section id="header">
-					<div class="container">
+  <form id="notionForm">
+    <label for="title">제목:</label><br>
+    <input type="text" id="title" name="title" required><br><br>
 
-						<!-- Logo -->
-							<h1 id="logo"><a href="index.html">ost personal blog</a></h1>
-							<p>Blog for linking with external PCs</p>
+    <label for="content">내용:</label><br>
+    <textarea id="content" name="content" rows="5" required></textarea><br><br>
 
-						<!-- Nav -->
-							<nav id="nav">
-								<ul>
-									<li><a class="icon solid fa-cog" href="index.html"><span>git data management</span></a></li>
-									<li><a class="icon solid fa-home" href="left-sidebar.html"><span>real estate</span></a></li>
-									<li><a class="icon solid fa-chart-line" href="right-sidebar.html"><span>stock</span></a></li>
-									<li><a class="icon solid fa-heart" href="no-sidebar.html"><span>marriage</span></a></li>
-								</ul>
-							</nav>
+    <button type="submit">등록</button>
+  </form>
 
-					</div>
-				</section>
+  <p id="response"></p>
 
-			<!-- Features -->
-				<section id="features">
-                    <section id="git">
-                        <h2>Git 데이터 관리</h2>
-                        <!-- Git 데이터 관리 기능 -->
-                        <input type="file" id="fileInput" />
-                        <button onclick="uploadFile()">파일 업로드</button>
-            
-                        <h2>리포지토리 파일 목록</h2>
-                        <ul id="fileList"></ul>
-                        <button onclick="deleteSelectedFiles()">선택한 파일 삭제</button>
-                        <button onclick="downloadSelectedFiles()">선택한 파일 다운로드</button>
-                    </section>
-				</section>
+  <script>
+    document.getElementById("notionForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-			<!-- Footer -->
-				<section id="footer">
-					<div id="copyright" class="container">
-						<ul class="links">
-							<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-						</ul>
-					</div>
-				</section>
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+      const responseElement = document.getElementById("response");
 
-		</div>
+      try {
+        const response = await fetch("/.netlify/functions/notion-handler", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, content }),
+        });
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.dropotron.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
-            <script>
-                // 환경변수를 저장할 전역 변수
-                let repoOwner, repoName, accessToken;
-                const selectedFiles = new Set(); // 선택한 파일을 저장하는 Set
+        const result = await response.json();
 
-                // 환경변수를 가져오는 함수
-                fetch('/.netlify/functions/getEnvVariables')  // Netlify Function 호출
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();  // JSON으로 응답받기
-                    })
-                    .then(data => {
-                        repoOwner = data.repoOwner;  // 함수에서 받은 값 할당
-                        repoName = data.repoName;
-                        accessToken = data.accessToken;
-
-                        fetchFileList(); // 페이지 로드 시 파일 목록 가져오기
-                        setInterval(fetchFileList, 5000); // 5초마다 호출
-                    })
-                    .catch(error => {
-                        console.error('Error fetching environment variables:', error);
-                    });
-
-                // 파일 업로드 함수
-                async function uploadFile() {
-                    const file = document.getElementById('fileInput').files[0];
-                    if (!file) {
-                        alert('파일을 선택하세요.'); // 파일 선택하지 않은 경우
-                        return; // 파일이 없을 경우 조기 리턴
-                    }
-
-                    // 로딩 메시지 표시
-                    const loadingMessage = document.createElement('div');
-                    loadingMessage.id = 'loadingMessage';
-                    loadingMessage.textContent = '파일 업로드 중...';
-                    document.body.appendChild(loadingMessage);
-
-                    const fileName = file.name;
-                    const reader = new FileReader();
-                    reader.onload = async function(event) {
-                        const content = event.target.result.split(',')[1]; // base64 인코딩
-                        const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${fileName}`;
-
-                        const response = await fetch(url, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `token ${accessToken}`,
-                                'Accept': 'application/vnd.github.v3+json',
-                            },
-                            body: JSON.stringify({
-                                message: `Upload ${fileName}`,
-                                content: content,
-                            }),
-                        });
-
-                        // 로딩 메시지 숨기기
-                        document.body.removeChild(loadingMessage);
-
-                        if (response.ok) {
-                            const jsonResponse = await response.json();
-                            console.log('파일 업로드 성공:', jsonResponse);
-                            alert('파일 업로드 성공!'); // 성공 알림
-                            fetchFileList(); // 파일 목록 갱신
-                        } else {
-                            const errorResponse = await response.json();
-                            console.error('파일 업로드 실패:', errorResponse);
-                            alert('파일 업로드 실패: ' + errorResponse.message); // 실패 알림
-                        }
-                    };
-                    reader.readAsDataURL(file); // 파일을 base64로 읽기
-                }
-
-
-                // 파일 목록 가져오기
-                async function fetchFileList() {
-                    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
-                    const response = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${accessToken}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                        },
-                    });
-
-                    if (response.ok) {
-                        const files = await response.json();
-                        displayFileList(files);
-                    } else {
-                        console.error('파일 목록을 가져오는 데 실패했습니다:', await response.json());
-                    }
-                    // // 임시 데이터 추가
-                    // displayFileList([
-                    //     { name: 'example.txt', path: 'example.txt' },
-                    //     { name: 'example2.txt', path: 'example2.txt' },
-                    //     { name: 'example3.txt', path: 'example3.txt' }
-                    // ]);
-                }
-
-                // 파일 목록 표시
-                function displayFileList(files) {
-                    const fileList = document.getElementById('fileList');
-                    fileList.innerHTML = ''; // 파일 목록 초기화
-
-                    files.forEach(file => {
-                        const listItem = document.createElement('li');
-                        const isDeletable = !['.gitignore', 'index.html', 'tts.py'].includes(file.name);
-
-                        // 선택된 파일인지 확인
-                        const isChecked = selectedFiles.has(file.path) ? 'checked' : '';
-
-                        listItem.innerHTML = `
-                            <input type="checkbox" value="${file.path}" ${isDeletable ? '' : 'disabled'} ${isChecked}>
-                            <span class="${isDeletable ? '' : 'disabled'}">${file.name}</span>
-                        `;
-
-                        // 체크박스 클릭 이벤트 추가
-                        listItem.querySelector('input[type="checkbox"]').addEventListener('change', (event) => {
-                            if (event.target.checked) {
-                                selectedFiles.add(file.path); // 체크된 파일 추가
-                            } else {
-                                selectedFiles.delete(file.path); // 체크 해제된 파일 삭제
-                            }
-                        });
-                        
-                        fileList.appendChild(listItem); // 리스트에 추가
-                    });
-                }
-
-
-                // 선택한 파일 삭제
-                async function deleteSelectedFiles() {
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-                    for (const checkbox of checkboxes) {
-                        const filePath = checkbox.value;
-                        await deleteFile(filePath);
-                    }
-                    fetchFileList(); // 파일 목록 갱신
-                }
-
-                // 파일 삭제 함수
-                async function deleteFile(filePath) {
-                    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-                    const response = await fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `token ${accessToken}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                        },
-                        body: JSON.stringify({
-                            message: `Delete ${filePath}`,
-                            sha: await getFileSHA(filePath), // SHA를 가져와야 합니다.
-                        }),
-                    });
-
-                    if (response.ok) {
-                        console.log(`${filePath}가 성공적으로 삭제되었습니다.`);
-                        alert(`${filePath}가 성공적으로 삭제되었습니다.`); // 성공 알림 추가
-                    } else {
-                        const errorResponse = await response.json();
-                        console.error('파일 삭제 실패:', errorResponse);
-                        alert('파일 삭제 실패: ' + errorResponse.message); // 실패 알림 추가
-                    }
-                }
-
-                async function downloadSelectedFiles() {
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-                    if (checkboxes.length === 0) {
-                        console.error('다운로드할 파일을 선택하세요.');
-                        return;
-                    }
-
-                    for (const checkbox of checkboxes) {
-                        const filePath = checkbox.value;
-
-                        // 파일인지 폴더인지 확인하기 위한 API 호출
-                        const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-                        const response = await fetch(url, {
-                            headers: {
-                                'Authorization': `token ${accessToken}`,
-                                'Accept': 'application/vnd.github.v3+json',
-                            },
-                        });
-
-                        if (!response.ok) {
-                            console.error(`파일 또는 폴더 정보를 가져오는 데 실패했습니다: ${filePath}`, await response.json());
-                            continue;
-                        }
-
-                        const fileData = await response.json();
-
-                        // 파일인지 폴더인지 확인
-                        if (fileData.type === 'file') {
-                            // 파일 다운로드
-                            const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${filePath}`;
-                            await downloadFile(downloadUrl, filePath);
-                        } else if (fileData.type === 'dir') {
-                            // 폴더인 경우, 폴더 내의 모든 파일 다운로드
-                            await downloadFolderContents(filePath);
-                        }
-                    }
-                }
-
-                // 특정 URL에서 파일 다운로드하는 함수
-                async function downloadFile(url, filePath) {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        console.error(`파일 다운로드 실패: ${filePath}`, await response.json());
-                        return;
-                    }
-                    const blob = await response.blob();
-                    const urlBlob = URL.createObjectURL(blob);
-
-                    const a = document.createElement('a');
-                    a.href = urlBlob;
-                    a.download = filePath;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(urlBlob);
-                }
-
-                // 폴더 내 모든 파일 다운로드 함수
-                async function downloadFolderContents(folderPath) {
-                    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`;
-                    const response = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${accessToken}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                        },
-                    });
-
-                    if (!response.ok) {
-                        console.error(`폴더 내용을 가져오는 데 실패했습니다: ${folderPath}`, await response.json());
-                        return;
-                    }
-
-                    const files = await response.json();
-
-                    for (const file of files) {
-                        if (file.type === 'file') {
-                            const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${file.path}`;
-                            await downloadFile(downloadUrl, file.path);
-                        } else if (file.type === 'dir') {
-                            // 하위 폴더가 있는 경우, 재귀적으로 호출
-                            await downloadFolderContents(file.path);
-                        }
-                    }
-                }
-
-
-                // 파일의 SHA를 가져오는 함수
-                async function getFileSHA(filePath) {
-                    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-                    const response = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${accessToken}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                        },
-                    });
-
-                    if (response.ok) {
-                        const fileInfo = await response.json();
-                        return fileInfo.sha; // 파일의 SHA 반환
-                    } else {
-                        console.error('파일 SHA를 가져오는 데 실패했습니다:', await response.json());
-                    }
-                }
-                window.onload = fetchFileList; // 페이지 로드 시 파일 목록을 불러옵니다.
-            </script>
-            <script type="module">
-                // 서버리스 함수에서 Google Sheets 데이터를 가져오는 함수
-                async function fetchGoogleSheetData(sheetName, worksheetName) {
-                    try {
-                        const response = await fetch('/.netlify/functions/googleAPI', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                sheetName: sheetName,      // 시트 ID 또는 이름
-                                worksheetName: worksheetName  // 워크시트 이름
-                            })
-                        });
-                        const data = await response.json(); // 서버리스 함수에서 받은 데이터를 JSON으로 변환
-                        return data;
-                    } catch (error) {
-                        console.error('Error fetching data from serverless function:', error);
-                        throw error;
-                    }
-                }
-            
-                // Google Sheets API에서 데이터 가져와서 처리하는 함수
-                fetchGoogleSheetData("1sscViRHXKS1t9SRHkvqtfJ8Q5HswyaeTFGT2jv8yUhQ", "단기스윙").then(records => {
-                    const headers = records[0];
-                    const desiredColumns = ['종목명', '날짜', '수익여부', '2차매수'];
-                    const desiredIndexes = desiredColumns.map(col => headers.indexOf(col));
-                    const filteredRecords = records.slice(1).map(row => {
-                        let filteredRow = {};
-                        desiredIndexes.forEach((index, i) => {
-                            filteredRow[desiredColumns[i]] = row[index];
-                        });
-                        return filteredRow;
-                    });
-            
-                    // 날짜 역순으로 정렬
-                    filteredRecords.sort((a, b) => new Date(b['날짜']) - new Date(a['날짜']));
-            
-                    // 표에 데이터 추가
-                    const tableBody = document.querySelector('#stocksTable tbody');
-                    filteredRecords.forEach(record => {
-                        const row = document.createElement('tr');
-                        desiredColumns.forEach(column => {
-                            const cell = document.createElement('td');
-                            cell.textContent = record[column];
-
-                            // 수익여부와 2차매수에 따라 스타일 적용
-                            if (column === '수익여부') {
-                                if (record[column] === '익절') {
-                                    cell.classList.add('profit');
-                                } else if (record[column] === '손절') {
-                                    cell.classList.add('loss');
-                                } else if (record[column] === '무효') {
-                                    cell.classList.add('invalid');
-                                }
-                            } else if (column === '2차매수') {
-                                if (record[column] === 'TRUE') {
-                                    cell.classList.add('true-value');
-                                } else if (record[column] === 'FALSE') {
-                                    cell.classList.add('false-value');
-                                }
-                            }
-
-                            row.appendChild(cell);
-                        });
-                        tableBody.appendChild(row);
-                    });
-                }).catch(error => {
-                    console.error('Error fetching records:', error);
-                });
-            </script>
-
-	</body>
+        if (response.ok) {
+          responseElement.textContent = `성공적으로 등록되었습니다! Notion 페이지: ${result.url}`;
+          responseElement.style.color = "green";
+        } else {
+          responseElement.textContent = `오류 발생: ${result.message}`;
+          responseElement.style.color = "red";
+        }
+      } catch (error) {
+        responseElement.textContent = `네트워크 오류: ${error.message}`;
+        responseElement.style.color = "red";
+      }
+    });
+  </script>
+</body>
 </html>
