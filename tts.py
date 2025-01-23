@@ -112,10 +112,11 @@ def text_to_speech(text, output_file, json_path, language_code="ko-KR", gender="
 # ]
 
 text_list =[
-    "도경수의 밤에 내리는 눈",
-    "황인욱의 어쩌면",
-    "나지혁의 아직도 여기 이렇게",
-    "기리보이의 사랑인 것 같은데"
+    "폴킴의 난 기억해",
+    "금쪽같은 레시피 틀어줘",
+    "협상의 기술 틀어줘",
+    "도와줘 창업박람회 틀어줘",
+    "서부의 사나이 틀어줘"
 ]
 
 list_path = "./list/daily_test"
