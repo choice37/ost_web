@@ -1,6 +1,5 @@
-// API 호출 함수
-async function callApi() {
-    const url = "http://14.52.72.42:8000/command"; // FastAPI 서버의 IP 주소와 포트
+exports.handler = async (event, context) => {
+    const url = "http://13.125.209.13:8000/command"; // FastAPI 서버의 IP 주소와 포트
     const data = {
         command: "start", // 호출할 명령어
         args: [] // 인자
@@ -20,11 +19,15 @@ async function callApi() {
         }
 
         const result = await response.json(); // 응답을 JSON으로 변환
-        console.log("응답:", result); // 응답 출력
-    } catch (error) {
-        console.error("오류 발생:", error); // 오류 처리
-    }
-}
 
-// API 호출 실행
-callApi();
+        return {
+            statusCode: 200,
+            body: JSON.stringify(result)
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+};
