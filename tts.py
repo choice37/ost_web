@@ -112,11 +112,12 @@ def text_to_speech(text, output_file, json_path, language_code="ko-KR", gender="
 # ]
 
 text_list =[
-    "그때 여전히 앨범 들려줘",
-    "타부 가족의 비밀 틀어줘",
-    "환악삼림 틀어줘",
-    "나의 인생여행 틀어줘",
-    "하와이 연가 틀어줘"
+    "피아노맨의 비가",
+    "심유선의 잊어버릴 수 있길",
+    "백억짜리 아침식사 틀어줘",
+    "네가 웃을 수 있다면 틀어줘",
+    "반칙왕 틀어줘",
+    "알뜰 N잡 틀어줘"
 ]
 
 list_path = "./list/daily_test"
