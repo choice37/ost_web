@@ -516,7 +516,7 @@
 						for (let year of Object.keys(monthlyData).sort()) {
 							const yearData = monthlyData[year];
 							if (Object.keys(yearData).length >= 2) {
-								const months = Object.keys(yearData).map(Number).sort();
+								const months = Object.keys(yearData).map(Number).sort((a, b) => a - b);
 								const minMonth = months[0];
 								const maxMonth = months[months.length - 1];
 								
